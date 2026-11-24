@@ -3,12 +3,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lampshade Studio</title>
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f1ec;--card:#fff;--tx:#1d1b18;--mu:#6d675e;--ac:#c4631b;--bd:#e0dad0;--cv:#e9e4dc}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171513;--card:#211e1b;--tx:#f1ece4;--mu:#a39b8f;--ac:#e8893f;--bd:#37322c;--cv:#0f0e0d}}
-:root[data-theme="dark"]{--bg:#171513;--card:#211e1b;--tx:#f1ece4;--mu:#a39b8f;--ac:#e8893f;--bd:#37322c;--cv:#0f0e0d}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#000000;--card:#0a0f0a;--tx:#e6ffe6;--mu:#78a878;--ac:#39ff14;--bd:#1d4a18;--cv:#020502}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000000;--card:#0a0f0a;--tx:#e6ffe6;--mu:#78a878;--ac:#39ff14;--bd:#1d4a18;--cv:#020502}}
+:root[data-theme="dark"]{--bg:#000000;--card:#0a0f0a;--tx:#e6ffe6;--mu:#78a878;--ac:#39ff14;--bd:#1d4a18;--cv:#020502}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
-header{padding:18px 20px 6px}h1{margin:0;font:600 24px Georgia,serif}header p{margin:4px 0 0;color:var(--mu)}
+header{padding:18px 20px 6px}h1{text-shadow:0 0 14px var(--ac);margin:0;font:600 24px Georgia,serif}header p{margin:4px 0 0;color:var(--mu)}
 main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,1fr);gap:16px;padding:14px 20px 28px}
 @media(max-width:820px){main{grid-template-columns:1fr}}
 #view{background:var(--cv);border:1px solid var(--bd);border-radius:14px;height:min(70vh,640px);min-height:340px;position:relative;overflow:hidden;touch-action:none;cursor:grab}
@@ -20,7 +20,7 @@ input[type=range]{width:100%;accent-color:var(--ac)}select,input[type=text],inpu
 h2{font:600 13px system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:14px 0 4px}h2:first-child{margin-top:0}
 .price{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0 4px}.price b{font:600 28px Georgia,serif}.price span{color:var(--mu);font-size:13px}
 button{font:inherit;padding:10px 14px;border-radius:9px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);cursor:pointer}
-button.p{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}.bt{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.bt>*{flex:1}
+button.p{background:var(--ac);color:#000;box-shadow:0 0 14px rgba(57,255,20,.45);border-color:var(--ac);font-weight:600}.bt{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.bt>*{flex:1}
 #msg{margin-top:8px;font-size:13px;color:var(--mu);min-height:18px}#ord{display:none;margin-top:10px;gap:8px;flex-direction:column}
 </style></head><body>
 <header><h1>Lampshade Studio</h1><p>Design a clear PLA lampshade, see it live in 3D, and order it printed.</p></header>
@@ -34,7 +34,10 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
 <h2>Top</h2>
 <div class="row"><label>Top style</label><select id="ct" style="grid-column:2/4"><option value="1">Dome</option><option value="0">Flat</option></select></div>
 <div id="g3"></div>
-<div class="price"><b id="pr">–</b><span id="gr"></span></div>
+<h2>Holes</h2>
+<div class="row"><label>Hole shape</label><select id="hs" style="grid-column:2/4"><option value="0">None</option><option value="1">Circle</option><option value="2">Square</option><option value="3">Diamond</option><option value="4">Triangle</option><option value="5">Hexagon</option><option value="6">Star</option><option value="7">Slot</option><option value="8">Mixed shapes</option></select></div>
+<div id="g4"></div>
+<div class="price"><span id="gr"></span></div>
 <div class="bt"><button id="stl">Download STL</button><button class="p" id="buy">Order this shade</button></div>
 <div id="ord"><input type="text" id="nm" placeholder="Your name"><input type="email" id="em" placeholder="Email"><button class="p" id="send">Send order request</button></div>
 <div id="msg"></div>
@@ -43,19 +46,25 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600}
 <script>
 const CFG={g1:[["bd","Bottom ⌀ (mm)",50,200,1,110],["h","Height (mm)",60,250,1,150],["ratio","Top ÷ bottom",.3,1.5,.01,.7],["bu","Bulge",-.4,.5,.01,0],["bc","Bulge count",1,5,1,1],["th","Wall (mm)",.8,2,.4,.8]],
 g2:[["fc","Fin count",0,60,1,24],["fd","Fin depth (mm)",0,12,.5,4],["tw","Twist (°)",-360,360,5,90],["fw","Blade width",.05,.9,.05,.3]],
-g3:[["ch","Dome height (mm)",5,100,1,30],["cs","Dome shape",1,2,.05,1.6],["hd","Top hole ⌀ (mm)",3,20,.5,6.5]]};
-const P={ft:0,ct:1};
+g3:[["ch","Dome height (mm)",5,100,1,30],["cs","Dome shape",1,2,.05,1.6],["hd","Top hole ⌀ (mm)",3,20,.5,6.5]],
+g4:[["hc","Holes around",3,24,1,8],["hrow","Rows",1,10,1,4],["hsz","Hole size (mm)",4,30,1,10],["hz0","Zone start %",10,60,1,20],["hz1","Zone end %",40,92,1,80]]};
+const P={ft:0,ct:1,hs:0};
 for(const g in CFG){const box=document.getElementById(g);for(const [k,l,a,b,s,v] of CFG[g]){P[k]=v;const r=document.createElement("div");r.className="row";r.innerHTML=`<label>${l}</label><input type="range" min="${a}" max="${b}" step="${s}" value="${v}"><output>${v}</output>`;const i=r.querySelector("input"),o=r.querySelector("output");i.oninput=()=>{P[k]=+i.value;o.textContent=i.value;sched()};box.appendChild(r)}}
-for(const k of ["ft","ct"])document.getElementById(k).onchange=e=>{P[k]=+e.target.value;sched()};
+for(const k of ["ft","ct","hs"])document.getElementById(k).onchange=e=>{P[k]=+e.target.value;sched()};
+function hOn(){return P.hs>0&&P.hc>0&&P.hrow>0&&P.hsz>0}
+function hit(sh,x,y,s){const ax=Math.abs(x),ay=Math.abs(y);
+switch(sh){case 1:return x*x+y*y<=s*s;case 2:return ax<=s&&ay<=s;case 3:return ax+ay<=s*1.3;case 4:return y>=-s&&y<=s&&ax<=(s-y)*.5;case 5:return ay<=.866*s&&ax*.866+ay*.5<=.866*s;
+case 6:{const a=Math.atan2(x,y),st=2*Math.PI/5,p=((a%st)+st)%st,t=Math.abs(p-st/2)/(st/2),r=.45*s+.55*s*t;return Math.hypot(x,y)<=r}
+case 7:{const c=Math.max(-s,Math.min(s,y));return x*x+(y-c)*(y-c)<=.16*s*s}}return false}
 function build(P,Q){
-const {bd,h,ratio,fc:n,ft,fd,tw,bu,bc,th,ct,ch:chp,cs,fw,hd}=P,RV=Q.rv,NC=Q.nc,PI=Math.PI;
+const {bd,h,ratio,fc:n,ft,fd,tw,bu,bc,th,ct,ch:chp,cs,fw,hd}=P,RV=Q.rv,NC=Q.nc,PI=Math.PI,HQ=hOn()?2:1;
 const rb=bd/2,rt=rb*ratio,sl=Math.atan2(Math.abs(rb-rt),h),to=th/Math.max(Math.cos(sl),.3),uf=n>0&&fd>0,rate=tw*PI/180/h,flat=ct==0;
 const prof=u=>ft==0?.5-.5*Math.cos(2*PI*u):ft==1?1-Math.abs(2*u-1):ft==2?Math.abs(Math.sin(PI*u)):u;
 const S=[];
-if(!uf){for(let i=0;i<96;i++)S.push([2*PI*i/96,0])}
-else if(ft==4){const w=Math.min(Math.max(fw,.05),.9),u1=(1-w)/2,u2=u1+w,e=.002,kg=Math.max(1,Math.max(8,Math.ceil(192/n))>>1);
+if(!uf){const m0=96*HQ;for(let i=0;i<m0;i++)S.push([2*PI*i/m0,0])}
+else if(ft==4){const w=Math.min(Math.max(fw,.05),.9),u1=(1-w)/2,u2=u1+w,e=.002,kg=Math.max(1,Math.max(8,Math.ceil(192*HQ/n))>>1);
 for(let f=0;f<n;f++){const us=[];for(let k=0;k<kg;k++)us.push([u1*k/kg,0]);us.push([u1,0],[u1+e,1],[u2-e,1],[u2,0]);for(let k=1;k<kg;k++)us.push([u2+(1-u2)*k/kg,0]);for(const [u,v] of us)S.push([2*PI*(f+u)/n,v])}}
-else{const per=Math.max(12,Math.ceil(96/n));for(let i=0;i<n*per;i++)S.push([2*PI*i/(n*per),prof((i%per)/per)])}
+else{const per=Math.max(12,Math.ceil(96*HQ/n));for(let i=0;i<n*per;i++)S.push([2*PI*i/(n*per),prof((i%per)/per)])}
 const M=S.length,base=t=>(rb+(rt-rb)*t)*(1+bu*Math.pow(Math.sin(bc*PI*t),2));
 const ring=(z,b,amp,rot)=>S.map(([t,f])=>{const r=Math.max(b+(uf?fd*f*amp:0),.1),a=t+rot;return[r*Math.cos(a),r*Math.sin(a),z]});
 const ih=flat?Math.max(h-th,1):h,minr=Math.max(base(ih/h)-to,.1),hr=Math.max(Math.min(hd/2,.8*minr),.5);
@@ -69,7 +78,22 @@ O.push(ring(zo,hr+(B1-hr)*sc+ms*c*fa,sc,rot));I.push(ring(zi,hr+(B1i-hr)*sc+ms*c
 const V=[],T=[],nr=O.length;
 for(const L of[O,I])for(const r of L)for(const v of r)V.push(v[0],v[1],v[2]);
 const oi=(k,i)=>k*M+(i%M),ii=(k,i)=>nr*M+k*M+(i%M),q=(a,b,c,d)=>T.push(a,b,c,a,c,d);
-for(let k=0;k<nr-1;k++)for(let i=0;i<M;i++){q(oi(k,i),oi(k,i+1),oi(k+1,i+1),oi(k+1,i));q(ii(k,i),ii(k+1,i),ii(k+1,i+1),ii(k,i+1))}
+const HM=new Uint8Array(RV*M);
+if(HQ>1){const shp=P.hs,cols=P.hc,rows=P.hrow,s=P.hsz/2,lo=h*P.hz0/100,hi=h*Math.max(P.hz1,P.hz0+5)/100,a0=lo+s,a1=hi-s,nrw=(rows>1&&a1>a0)?rows:1,dzr=nrw>1?(a1-a0)/(nrw-1):0,dA=2*PI/cols;
+for(let k=0;k<RV;k++){const t=(k+.5)/RV,z=h*t;if(z<lo||z>hi)continue;
+let ri=nrw>1?Math.round((z-a0)/dzr):0;ri=Math.max(0,Math.min(nrw-1,ri));const zc=nrw>1?a0+ri*dzr:(lo+hi)/2,dy=z-zc,rt2=rate*z,off=(ri%2)*.5*dA;
+for(let i=0;i<M;i++){const t0=S[i][0],t1=i<M-1?S[i+1][0]:S[0][0]+2*PI,thc=.5*(t0+t1)+rt2-off;
+const ci=Math.round(thc/dA),dx=(thc-ci*dA)*base(t),cc=((ci%cols)+cols)%cols;
+const sh=shp===8?[1,2,3,4,5,6][(cc+ri)%6]:shp;if(hit(sh,dx,dy,s))HM[k*M+i]=1}}}
+for(let pass=0;pass<4&&HQ>1;pass++){let c2=0;for(let k=0;k<RV-1;k++)for(let i=0;i<M;i++){const j=(i+1)%M,a=HM[k*M+i],b=HM[k*M+j],c=HM[(k+1)*M+i],d=HM[(k+1)*M+j];
+if(a&&d&&!b&&!c){HM[k*M+j]=1;c2=1}else if(b&&c&&!a&&!d){HM[k*M+i]=1;c2=1}}if(!c2)break}
+for(let k=0;k<nr-1;k++)for(let i=0;i<M;i++){const hm=k<RV&&HM[k*M+i];
+if(!hm){q(oi(k,i),oi(k,i+1),oi(k+1,i+1),oi(k+1,i));q(ii(k,i),ii(k+1,i),ii(k+1,i+1),ii(k,i+1));continue}
+const L=HM[k*M+(i+M-1)%M],R=HM[k*M+(i+1)%M],B=k>0?HM[(k-1)*M+i]:0,Tp=k+1<RV?HM[(k+1)*M+i]:0;
+if(!L)q(oi(k,i),ii(k,i),ii(k+1,i),oi(k+1,i));
+if(!R)q(oi(k,i+1),oi(k+1,i+1),ii(k+1,i+1),ii(k,i+1));
+if(!B)q(oi(k,i),oi(k,i+1),ii(k,i+1),ii(k,i));
+if(!Tp)q(oi(k+1,i),ii(k+1,i),ii(k+1,i+1),oi(k+1,i+1))}
 for(let i=0;i<M;i++){q(oi(nr-1,i),oi(nr-1,i+1),ii(nr-1,i+1),ii(nr-1,i));q(oi(0,i),ii(0,i),ii(0,i+1),oi(0,i+1))}
 return{V:new Float32Array(V),T:new Uint32Array(T)}}
 // ---- 3D view ----
@@ -77,15 +101,15 @@ const el=document.getElementById("view"),ren=new THREE.WebGLRenderer({antialias:
 ren.setPixelRatio(Math.min(devicePixelRatio,2));el.prepend(ren.domElement);
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(35,1,1,3000),grp=new THREE.Group();scene.add(grp);
 scene.add(new THREE.HemisphereLight(0xffffff,0x8a7f70,.9));const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(200,300,250);scene.add(dl);
-const bulb=new THREE.PointLight(0xffc27a,.6,400);scene.add(bulb);
-const mat=new THREE.MeshStandardMaterial({color:0xcfe6ee,transparent:true,opacity:.62,roughness:.25,metalness:0,side:THREE.DoubleSide,flatShading:true});
+const bulb=new THREE.PointLight(0x39ff14,1.2,500);scene.add(bulb);
+const mat=new THREE.MeshStandardMaterial({color:0x8dffa8,transparent:true,opacity:.62,roughness:.25,metalness:0,side:THREE.DoubleSide,flatShading:true});
 let mesh=null,cur=null,ry=.6,drag=false,lx=0;
-function show(){const m=build(P,{rv:70,nc:30});cur=m;const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(m.V,3));g.setIndex(new THREE.BufferAttribute(m.T,1));g.computeBoundingBox();const H=g.boundingBox.max.z;g.translate(0,0,-H/2);
+function show(){const m=build(P,{rv:hOn()?110:70,nc:30});cur=m;const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(m.V,3));g.setIndex(new THREE.BufferAttribute(m.T,1));g.computeBoundingBox();const H=g.boundingBox.max.z;g.translate(0,0,-H/2);
 if(mesh){mesh.geometry.dispose();grp.remove(mesh)}mesh=new THREE.Mesh(g,mat);mesh.rotation.x=-Math.PI/2;grp.add(mesh);
 const d=Math.max(H,P.bd*1.2)*2.4;cam.position.set(0,H*.25,d);cam.lookAt(0,0,0);bulb.position.set(0,-H*.2,0);
 let vol=0;const V=m.V,T=m.T;for(let i=0;i<T.length;i+=3){const a=T[i]*3,b=T[i+1]*3,c=T[i+2]*3;vol+=V[a]*(V[b+1]*V[c+2]-V[b+2]*V[c+1])-V[a+1]*(V[b]*V[c+2]-V[b+2]*V[c])+V[a+2]*(V[b]*V[c+1]-V[b+1]*V[c])}
-const gr=Math.abs(vol)/6/1000*1.24,pr=4+gr*.07+H*.01;m.price=pr;m.gr=gr;
-document.getElementById("pr").textContent="≈ €"+pr.toFixed(2);document.getElementById("gr").textContent=Math.round(gr)+" g clear PLA · "+Math.round(H)+" mm tall"}
+const gr=Math.abs(vol)/6/1000*1.24;m.gr=gr;
+document.getElementById("gr").textContent=Math.round(gr)+" g clear PLA · "+Math.round(H)+" mm tall"}
 let tm;function sched(){clearTimeout(tm);tm=setTimeout(show,60)}
 function size(){const w=el.clientWidth,h=el.clientHeight;ren.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
 addEventListener("resize",size);size();
@@ -99,12 +123,12 @@ function stl(m){const T=m.T,V=m.V,n=T.length/3,b=new ArrayBuffer(84+n*50),dv=new
 for(let i=0;i<n;i++){const t=[T[i*3]*3,T[i*3+1]*3,T[i*3+2]*3],a=[0,1,2].map(j=>V[t[0]+j]),bb=[0,1,2].map(j=>V[t[1]+j]),c=[0,1,2].map(j=>V[t[2]+j]);
 const u=bb.map((x,j)=>x-a[j]),v=c.map((x,j)=>x-a[j]);let nx=u[1]*v[2]-u[2]*v[1],ny=u[2]*v[0]-u[0]*v[2],nz=u[0]*v[1]-u[1]*v[0];const l=Math.hypot(nx,ny,nz)||1;
 [nx/l,ny/l,nz/l,...a,...bb,...c].forEach(x=>{dv.setFloat32(o,x,true);o+=4});o+=2}return b}
-document.getElementById("stl").onclick=()=>{msg("Building a high-resolution file…");setTimeout(()=>{const hi=build(P,{rv:160,nc:48}),bl=new Blob([stl(hi)],{type:"model/stl"}),a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download="lampshade.stl";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg("Saved.")},30)};
+document.getElementById("stl").onclick=()=>{msg("Building a high-resolution file…");setTimeout(()=>{const hi=build(P,{rv:hOn()?260:160,nc:48}),bl=new Blob([stl(hi)],{type:"model/stl"}),a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download="lampshade.stl";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg("Saved.")},30)};
 document.getElementById("buy").onclick=()=>{document.getElementById("ord").style.display="flex"};
-const ORDER_EMAIL="mudest.made@gmail.com"; // <-- put YOUR email here
+const ORDER_EMAIL="you@example.com"; // <-- put YOUR email here
 document.getElementById("send").onclick=()=>{const nm=document.getElementById("nm").value.trim(),em=document.getElementById("em").value.trim();
 if(!nm||!em)return msg("Please add your name and email.");
-const body="Name: "+nm+"\nEmail: "+em+"\nEstimate: €"+cur.price.toFixed(2)+" ("+Math.round(cur.gr)+" g clear PLA)\n\nDesign settings:\n"+JSON.stringify(P);
+const body="Name: "+nm+"\nEmail: "+em+"\nApprox. weight: "+Math.round(cur.gr)+" g clear PLA\n\nDesign settings:\n"+JSON.stringify(P);
 location.href="mailto:"+ORDER_EMAIL+"?subject="+encodeURIComponent("Lampshade order")+"&body="+encodeURIComponent(body);
 msg("Your email app should open with the order details. Press send and we’ll confirm.")};
 </script></body></html>
